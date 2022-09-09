@@ -268,40 +268,33 @@ public class Gitcafe extends Spider {
     }
 
     @Override
-    public String searchContent(String str, boolean z) {
+    public String searchContent(String key, boolean quick) {
         try {
-            Map allData = getAllData(this, this, this);
-            JSONArray jSONArray = new JSONArray();
-            Set keySet = allData.keySet();
-            Iterator it = keySet.iterator();
-            while (true) {
-                if (it.hasNext()) {
-                    Object next = it.next();
-                    JSONObject jSONObject = (JSONObject) allData.get(next);
-                    if (jSONObject.has("cat")) {
-                        String string = jSONObject.getString("cat");
-                        List<String> list = b;
-                        if (list.contains(string)) {
-                            String string2 = jSONObject.getString("title");
-                            if (string2.contains(str)) {
-                                JSONObject jSONObject2 = new JSONObject();
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("https://www.aliyundrive.com/s/");
-                                String string3 = jSONObject.getString("key");
-                                sb.append(string3);
-                                String sb2 = sb.toString();
-                                jSONObject2.put("vod_id", sb2);
-                                jSONObject2.put("vod_name", string2);
-                                jSONArray.put(jSONObject2);
-                            }
-                        }
-                    }
-                } else {
-                    JSONObject jSONObject3 = new JSONObject();
-                    jSONObject3.put("list", jSONArray);
-                    return jSONObject3.toString();
-                }
+            String url = "https://gitcafe.net/tool/alipaper/";
+            HashMap hashMap = new HashMap();
+            hashMap.put("action", "search");
+            hashMap.put("keyword", key);
+            JSONArray searchResult = new JSONArray(postMap(url, hashMap,null));
+            JSONObject result = new JSONObject();
+            JSONArray videos = new JSONArray();
+            for (int i = 0; i < searchResult.length(); i++) {
+                JSONObject vod = searchResult.getJSONObject(i);
+                StringBuilder sb = new StringBuilder();
+                sb.append("https://www.aliyundrive.com/s/");
+                String string3 = vod.getString("key");
+                sb.append(string3);
+                String sb2 = sb.toString();
+                String title = vod.getString("title");
+                String des = vod.getString("des");
+                JSONObject v = new JSONObject();
+                v.put("vod_id", sb2);
+                v.put("vod_name", title);
+                v.put("vod_remarks", des);
+                videos.put(v);
             }
+
+            result.put("list", videos);
+            return result.toString();
         } catch (Exception e) {
             e.printStackTrace();
             return "";
